@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: 42-internship-proxy
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: CLIENT_ID
+        value: u-s4t2ud-ef36002557af77e06b62c1ad0bec73b02b950146a18017c8cc1c3d0fb49be26f
+      - key: CLIENT_SECRET
+        value: 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
+      - key: REDIRECT_URI
+        value: https://aezzahir.github.io/42-internship-finder/
