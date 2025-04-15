@@ -33,48 +33,6 @@
             margin-bottom: 30px;
         }
         
-        .search-form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            flex: 1 0 200px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        
-        button {
-            background-color: #00babc;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-        
-        button:hover {
-            background-color: #00a0a2;
-        }
-        
         .results-container {
             background-color: white;
             padding: 25px;
@@ -168,6 +126,8 @@
             color: #00babc;
             border: 1px solid #00babc;
             padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
         }
         
         .pagination button.active {
@@ -182,85 +142,49 @@
             cursor: not-allowed;
         }
         
-        @media (max-width: 768px) {
-            .search-form {
-                flex-direction: column;
-            }
-            
-            .form-group {
-                flex: 1 0 100%;
-            }
+        .status-message {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        #loginButton {
+            background-color: #00babc;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: block;
+            margin: 20px auto;
+            min-width: 200px;
+        }
+        
+        #loginButton:hover {
+            background-color: #00a0a2;
         }
     </style>
 </head>
 <body>
     <header>
         <h1>42 Internship Finder</h1>
-        <p>Find the perfect internship opportunity at 42 partner companies</p>
+        <p>View available internship opportunities at 42 partner companies</p>
     </header>
     
     <main>
-        <section class="search-container">
-            <h2>Search Internships</h2>
-            <form id="searchForm" class="search-form">
-                <div class="form-group">
-                    <label for="keyword">Keywords</label>
-                    <input type="text" id="keyword" placeholder="Search by title, skills, etc.">
-                </div>
-                
-                <div class="form-group">
-                    <label for="location">Location</label>
-                    <input type="text" id="location" placeholder="City, country...">
-                </div>
-                
-                <div class="form-group">
-                    <label for="company">Company</label>
-                    <input type="text" id="company" placeholder="Company name">
-                </div>
-                
-                <div class="form-group">
-                    <label for="sector">Sector</label>
-                    <select id="sector">
-                        <option value="">All Sectors</option>
-                        <option value="agro">Agriculture</option>
-                        <option value="audit">Audit</option>
-                        <option value="banque">Banking</option>
-                        <option value="commerce">Commerce</option>
-                        <option value="comm">Communication</option>
-                        <option value="edition">Publishing</option>
-                        <option value="industrie">Industry</option>
-                        <option value="info">IT</option>
-                        <option value="luxe">Luxury</option>
-                        <option value="pharma">Pharmaceutical</option>
-                        <option value="services">Services</option>
-                        <option value="culture">Culture</option>
-                        <option value="immobilier">Real Estate</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="duration">Duration</label>
-                    <select id="duration">
-                        <option value="">Any Duration</option>
-                        <option value="1-3">1-3 months</option>
-                        <option value="3-6">3-6 months</option>
-                        <option value="6+">6+ months</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button type="submit" id="searchButton">Search</button>
-                </div>
-            </form>
-        </section>
-        
         <section class="results-container">
-            <h2>Results</h2>
+            <h2>Available Internships</h2>
+            <div id="authContainer">
+                <p class="status-message">Please log in with your 42 account to view available internship offers</p>
+                <button id="loginButton">Login with 42</button>
+            </div>
+            
             <div id="errorMessage" class="error-message" style="display: none;"></div>
             <div id="loadingIndicator" class="loading" style="display: none;">
-                <p>Loading results...</p>
+                <p>Loading internship offers...</p>
             </div>
             <div id="results"></div>
             <div id="pagination" class="pagination"></div>
@@ -270,32 +194,100 @@
     <script>
         // Configuration
         const API_BASE_URL = 'https://companies.intra.42.fr';
-        const OFFERS_ENDPOINT = '/v2/companies/:company_id/internships_users';
-        
-        // State variables
-        let currentPage = 1;
-        let totalPages = 1;
-        let currentOffers = [];
+        const OFFER_DETAIL_ENDPOINT = '/offers/23430'; // Specific offer endpoint as provided
+        const AUTH_REDIRECT_URI = window.location.href;
         
         // DOM Elements
-        const searchForm = document.getElementById('searchForm');
         const resultsContainer = document.getElementById('results');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorMessage = document.getElementById('errorMessage');
         const paginationContainer = document.getElementById('pagination');
+        const authContainer = document.getElementById('authContainer');
+        const loginButton = document.getElementById('loginButton');
         
         // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
-            // Initial load with a default search
-            fetchOffers();
-            
-            // Set up search form submission
-            searchForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                currentPage = 1;
+            // Check if user is authenticated
+            if (isAuthenticated()) {
+                authContainer.style.display = 'none';
                 fetchOffers();
-            });
+            } else {
+                setupLoginButton();
+                handleAuthCallback();
+            }
         });
+        
+        function setupLoginButton() {
+            loginButton.addEventListener('click', () => {
+                // Redirect to 42 OAuth login
+                const clientId = '42_client_id'; // Replace with your actual client ID
+                const redirectUri = encodeURIComponent(AUTH_REDIRECT_URI);
+                const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
+                window.location.href = authUrl;
+            });
+        }
+        
+        function handleAuthCallback() {
+            // Check if the URL contains an authorization code
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            
+            if (code) {
+                // Exchange code for token
+                showLoading(true);
+                exchangeCodeForToken(code)
+                    .then(token => {
+                        // Save token and fetch offers
+                        saveToken(token);
+                        authContainer.style.display = 'none';
+                        fetchOffers();
+                    })
+                    .catch(error => {
+                        showError('Authentication failed. Please try again.');
+                        console.error('Auth Error:', error);
+                        showLoading(false);
+                    });
+            }
+        }
+        
+        async function exchangeCodeForToken(code) {
+            // In a real app, you would call your backend to exchange the code for a token
+            // GitHub Pages doesn't support server-side code, so this would need to be handled by a separate backend service
+            
+            // Simulated token exchange - replace with actual implementation when you have a backend
+            return new Promise((resolve, reject) => {
+                // For demo purposes only - in production, use a real backend exchange
+                // This is just to show the flow - NOT for production use
+                resolve({
+                    access_token: 'simulated_token',
+                    expires_in: 7200
+                });
+            });
+        }
+        
+        function saveToken(token) {
+            localStorage.setItem('42_auth_token', token.access_token);
+            localStorage.setItem('42_token_expiry', Date.now() + (token.expires_in * 1000));
+        }
+        
+        function getToken() {
+            return localStorage.getItem('42_auth_token');
+        }
+        
+        function isTokenExpired() {
+            const expiry = localStorage.getItem('42_token_expiry');
+            return !expiry || parseInt(expiry) < Date.now();
+        }
+        
+        function isAuthenticated() {
+            return getToken() && !isTokenExpired();
+        }
+        
+        function logout() {
+            localStorage.removeItem('42_auth_token');
+            localStorage.removeItem('42_token_expiry');
+            window.location.reload();
+        }
         
         // API Functions
         async function fetchOffers() {
@@ -303,25 +295,9 @@
             clearError();
             
             try {
-                // In a real implementation, we would use the form values to construct 
-                // the API request. Here's a simplified version:
-                const keyword = document.getElementById('keyword').value;
-                const location = document.getElementById('location').value;
-                const company = document.getElementById('company').value;
-                const sector = document.getElementById('sector').value;
-                const duration = document.getElementById('duration').value;
-                
-                // Normally we would call the actual API here
-                // For this demo, we'll simulate a response since we can't make actual API calls from GitHub Pages
-                
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // For demo purposes, generate mock data based on search parameters
-                const mockData = generateMockOffers(keyword, location, company, sector, duration);
-                
-                displayOffers(mockData.offers);
-                updatePagination(mockData.pagination);
+                // Since the specific offer ID was provided (23430)
+                const offer = await fetchOfferById(23430);
+                displayOffer(offer);
             } catch (error) {
                 showError('Error fetching internship offers. Please try again later.');
                 console.error('API Error:', error);
@@ -330,66 +306,61 @@
             }
         }
         
+        async function fetchOfferById(id) {
+            // In a production app, this would make an actual API request
+            // Since we can't make direct API calls from GitHub Pages due to CORS restrictions,
+            // we'll simulate the API response structure based on the endpoint documentation
+            
+            // Simulated offer data structure based on API documentation
+            // In production, replace this with an actual fetch call to your backend proxy
+            return {
+                id: 23430,
+                title: "Software Engineering Internship",
+                description: "Join our engineering team and work on cutting-edge technology projects. This internship offers hands-on experience with our software development lifecycle and collaboration with senior engineers.",
+                company: {
+                    id: 42,
+                    name: "42 Technology Partners",
+                    country: "France",
+                    city: "Paris"
+                },
+                location: "Paris, France",
+                duration: "6 months",
+                compensation: "€1200/month",
+                requirements: "- Experience with C/C++\n- Knowledge of algorithms and data structures\n- Interest in system programming",
+                apply_url: "https://companies.intra.42.fr/offers/23430",
+                posted_date: "2025-03-15"
+            };
+        }
+        
         // UI Functions
-        function displayOffers(offers) {
-            currentOffers = offers;
-            
-            if (offers.length === 0) {
-                resultsContainer.innerHTML = '<p>No internship offers found matching your criteria.</p>';
-                return;
-            }
-            
-            let html = '';
-            offers.forEach(offer => {
-                html += `
-                    <div class="offer-card">
-                        <h3 class="offer-title">${offer.title}</h3>
-                        <p class="offer-company">${offer.company}</p>
-                        <p class="offer-location">${offer.location}</p>
-                        <div class="offer-description">${offer.description}</div>
-                        <div class="offer-details">
-                            <span class="offer-detail">Duration: ${offer.duration}</span>
-                            <span class="offer-detail">Posted: ${offer.postedDate}</span>
-                            <span class="offer-detail">Compensation: ${offer.compensation}</span>
-                        </div>
-                        <a href="${API_BASE_URL}/offers/${offer.id}" class="apply-btn" target="_blank">View Details</a>
+        function displayOffer(offer) {
+            let html = `
+                <div class="offer-card">
+                    <h3 class="offer-title">${offer.title}</h3>
+                    <p class="offer-company">${offer.company.name}</p>
+                    <p class="offer-location">${offer.location}</p>
+                    <div class="offer-description">${offer.description}</div>
+                    
+                    <h4>Requirements</h4>
+                    <div class="offer-description">${offer.requirements}</div>
+                    
+                    <div class="offer-details">
+                        <span class="offer-detail">Duration: ${offer.duration}</span>
+                        <span class="offer-detail">Posted: ${formatDate(offer.posted_date)}</span>
+                        <span class="offer-detail">Compensation: ${offer.compensation}</span>
                     </div>
-                `;
-            });
+                    
+                    <a href="${API_BASE_URL}/offers/${offer.id}" class="apply-btn" target="_blank">View Details & Apply</a>
+                </div>
+            `;
             
             resultsContainer.innerHTML = html;
+            paginationContainer.innerHTML = ''; // No pagination needed for single offer
         }
         
-        function updatePagination(pagination) {
-            totalPages = pagination.totalPages;
-            currentPage = pagination.currentPage;
-            
-            let html = '';
-            
-            // Previous button
-            html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">Previous</button>`;
-            
-            // Page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === currentPage) {
-                    html += `<button class="active">${i}</button>`;
-                } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                    html += `<button onclick="changePage(${i})">${i}</button>`;
-                } else if (i === currentPage - 2 || i === currentPage + 2) {
-                    html += '<button disabled>...</button>';
-                }
-            }
-            
-            // Next button
-            html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next</button>`;
-            
-            paginationContainer.innerHTML = html;
-        }
-        
-        function changePage(page) {
-            if (page < 1 || page > totalPages) return;
-            currentPage = page;
-            fetchOffers();
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
         }
         
         function showLoading(isLoading) {
@@ -405,96 +376,6 @@
             errorMessage.textContent = '';
             errorMessage.style.display = 'none';
         }
-        
-        // Mock Data Generation (for demo purposes)
-        function generateMockOffers(keyword, location, company, sector, duration) {
-            // Generate 5-10 random internship offers
-            const count = Math.floor(Math.random() * 6) + 5;
-            const offers = [];
-            
-            const sectors = ['IT', 'Banking', 'Communication', 'Publishing', 'Industry'];
-            const locations = ['Paris, France', 'Berlin, Germany', 'London, UK', 'Barcelona, Spain', 'Amsterdam, Netherlands'];
-            const companies = ['TechCorp', '42 Partners', 'Digital Solutions', 'CodeCrafters', 'WebWizards'];
-            const durations = ['2 months', '3 months', '4 months', '6 months'];
-            const compensations = ['€500/month', '€800/month', '€1000/month', '€1200/month', 'Unpaid'];
-            
-            // Filter based on search parameters if provided
-            let filteredSectors = sectors;
-            let filteredLocations = locations;
-            let filteredCompanies = companies;
-            let filteredDurations = durations;
-            
-            if (sector) {
-                filteredSectors = sectors.filter(s => s.toLowerCase().includes(sector));
-            }
-            
-            if (location) {
-                filteredLocations = locations.filter(l => l.toLowerCase().includes(location.toLowerCase()));
-            }
-            
-            if (company) {
-                filteredCompanies = companies.filter(c => c.toLowerCase().includes(company.toLowerCase()));
-            }
-            
-            if (duration) {
-                switch (duration) {
-                    case '1-3':
-                        filteredDurations = durations.filter(d => parseInt(d) <= 3);
-                        break;
-                    case '3-6':
-                        filteredDurations = durations.filter(d => parseInt(d) >= 3 && parseInt(d) <= 6);
-                        break;
-                    case '6+':
-                        filteredDurations = durations.filter(d => parseInt(d) >= 6);
-                        break;
-                }
-            }
-            
-            // Generate the offers
-            for (let i = 0; i < count; i++) {
-                const sectorItem = filteredSectors[Math.floor(Math.random() * filteredSectors.length)] || sectors[0];
-                const locationItem = filteredLocations[Math.floor(Math.random() * filteredLocations.length)] || locations[0];
-                const companyItem = filteredCompanies[Math.floor(Math.random() * filteredCompanies.length)] || companies[0];
-                const durationItem = filteredDurations[Math.floor(Math.random() * filteredDurations.length)] || durations[0];
-                const compensationItem = compensations[Math.floor(Math.random() * compensations.length)];
-                
-                let title = '';
-                
-                // Incorporate keyword in title if provided
-                if (keyword) {
-                    title = `${keyword} Internship at ${companyItem}`;
-                } else {
-                    const positions = ['Software Developer', 'Web Developer', 'Data Scientist', 'UX Designer', 'DevOps Engineer'];
-                    const position = positions[Math.floor(Math.random() * positions.length)];
-                    title = `${position} Internship`;
-                }
-                
-                const descriptions = [
-                    `Join our team and work on real-world projects in the ${sectorItem} sector. You will gain hands-on experience with cutting-edge technologies and collaborate with experienced professionals.`,
-                    `We're looking for an enthusiastic intern to help us build the future of ${sectorItem}. This is a unique opportunity to develop your skills in a fast-paced environment.`,
-                    `This internship provides a comprehensive learning experience in ${sectorItem}. You'll work directly with senior team members and contribute to projects that matter.`
-                ];
-                
-                offers.push({
-                    id: 23430 + i,
-                    title,
-                    company: companyItem,
-                    location: locationItem,
-                    description: descriptions[Math.floor(Math.random() * descriptions.length)],
-                    duration: durationItem,
-                    compensation: compensationItem,
-                    postedDate: `${Math.floor(Math.random() * 20) + 1} days ago`
-                });
-            }
-            
-            return {
-                offers,
-                pagination: {
-                    totalPages: 5,
-                    currentPage
-                }
-            };
-        }
     </script>
-</body>a
-</html>a
+</body>
+</html>
