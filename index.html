@@ -25,6 +25,13 @@
             margin-bottom: 10px;
         }
         
+        .results-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
         .search-container {
             background-color: white;
             padding: 25px;
@@ -33,11 +40,44 @@
             margin-bottom: 30px;
         }
         
-        .results-container {
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .search-btn {
+            background-color: #00babc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .filter-select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             background-color: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         
         .offer-card {
@@ -148,23 +188,86 @@
             color: #666;
         }
         
-        #loginButton {
+        .auth-form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .form-group button {
+            width: 100%;
             background-color: #00babc;
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 12px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: background-color 0.3s;
-            display: block;
-            margin: 20px auto;
-            min-width: 200px;
         }
         
-        #loginButton:hover {
-            background-color: #00a0a2;
+        #logoutButton {
+            background-color: transparent;
+            color: #666;
+            border: 1px solid #ccc;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .tab-button.active {
+            color: #00babc;
+            border-bottom-color: #00babc;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
@@ -175,192 +278,439 @@
     </header>
     
     <main>
+        <section class="search-container">
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-tab="search">Search</button>
+                    <button class="tab-button" data-tab="direct">Direct Access</button>
+                    <button class="tab-button" data-tab="settings">Settings</button>
+                </div>
+                
+                <div class="tab-content active" id="search-tab">
+                    <form id="searchForm" class="search-form">
+                        <input type="text" id="searchInput" class="search-input" placeholder="Search by keyword...">
+                        <button type="submit" class="search-btn">Search</button>
+                    </form>
+                    
+                    <div class="filter-container">
+                        <select id="locationFilter" class="filter-select">
+                            <option value="">All Locations</option>
+                            <option value="paris">Paris</option>
+                            <option value="remote">Remote</option>
+                            <option value="london">London</option>
+                            <option value="berlin">Berlin</option>
+                            <option value="san-francisco">San Francisco</option>
+                        </select>
+                        
+                        <select id="durationFilter" class="filter-select">
+                            <option value="">All Durations</option>
+                            <option value="3">3 months</option>
+                            <option value="4">4 months</option>
+                            <option value="6">6 months</option>
+                            <option value="12">12 months</option>
+                        </select>
+                        
+                        <select id="sortOrder" class="filter-select">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="direct-tab">
+                    <form id="directAccessForm" class="search-form">
+                        <input type="text" id="offerIdInput" class="search-input" placeholder="Enter Offer ID (e.g. 23430)">
+                        <button type="submit" class="search-btn">Load Offer</button>
+                    </form>
+                </div>
+                
+                <div class="tab-content" id="settings-tab">
+                    <div class="auth-form">
+                        <h3>API Authentication</h3>
+                        <div class="form-group">
+                            <label for="apiTokenInput">API Token</label>
+                            <input type="password" id="apiTokenInput" placeholder="Enter your 42 API token">
+                        </div>
+                        <div class="form-group">
+                            <button id="saveTokenButton">Save Token</button>
+                        </div>
+                        <p><small>Note: Your API token is stored locally in your browser and not sent to any third party.</small></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
         <section class="results-container">
-            <h2>Available Internships</h2>
-            <div id="authContainer">
-                <p class="status-message">Please log in with your 42 account to view available internship offers</p>
-                <button id="loginButton">Login with 42</button>
+            <div id="authRequiredMessage" style="display: none;">
+                <p class="status-message">Please set your API token in the Settings tab to access internship offers.</p>
             </div>
             
             <div id="errorMessage" class="error-message" style="display: none;"></div>
             <div id="loadingIndicator" class="loading" style="display: none;">
                 <p>Loading internship offers...</p>
             </div>
+            
             <div id="results"></div>
             <div id="pagination" class="pagination"></div>
+            
+            <button id="logoutButton">Clear API Token</button>
         </section>
     </main>
     
     <script>
         // Configuration
         const API_BASE_URL = 'https://companies.intra.42.fr';
-        const OFFER_DETAIL_ENDPOINT = '/offers/23430'; // Specific offer endpoint as provided
-        const AUTH_REDIRECT_URI = window.location.href;
+        const DEFAULT_OFFER_ID = '23430';
         
         // DOM Elements
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const locationFilter = document.getElementById('locationFilter');
+        const durationFilter = document.getElementById('durationFilter');
+        const sortOrder = document.getElementById('sortOrder');
+        const directAccessForm = document.getElementById('directAccessForm');
+        const offerIdInput = document.getElementById('offerIdInput');
+        const apiTokenInput = document.getElementById('apiTokenInput');
+        const saveTokenButton = document.getElementById('saveTokenButton');
         const resultsContainer = document.getElementById('results');
+        const paginationContainer = document.getElementById('pagination');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorMessage = document.getElementById('errorMessage');
-        const paginationContainer = document.getElementById('pagination');
-        const authContainer = document.getElementById('authContainer');
-        const loginButton = document.getElementById('loginButton');
+        const authRequiredMessage = document.getElementById('authRequiredMessage');
+        const logoutButton = document.getElementById('logoutButton');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // App State
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentSearchParams = {};
+        let isSearchActive = false;
         
         // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
-            // Check if user is authenticated
-            if (isAuthenticated()) {
-                authContainer.style.display = 'none';
-                fetchOffers();
+            // Set up tabs
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+            
+            // Check for stored token
+            const token = localStorage.getItem('42_api_token');
+            if (token) {
+                apiTokenInput.value = token;
+                logoutButton.style.display = 'block';
+                authRequiredMessage.style.display = 'none';
             } else {
-                setupLoginButton();
-                handleAuthCallback();
+                authRequiredMessage.style.display = 'block';
+            }
+            
+            // Populate the offer ID input with the default value
+            offerIdInput.value = DEFAULT_OFFER_ID;
+            
+            // Set up event listeners
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!getToken()) {
+                    showAuthRequired();
+                    return;
+                }
+                
+                currentPage = 1;
+                isSearchActive = true;
+                currentSearchParams = {
+                    query: searchInput.value,
+                    location: locationFilter.value,
+                    duration: durationFilter.value,
+                    sort: sortOrder.value
+                };
+                searchOffers(currentSearchParams, currentPage);
+            });
+            
+            directAccessForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!getToken()) {
+                    showAuthRequired();
+                    return;
+                }
+                
+                isSearchActive = false;
+                const offerId = offerIdInput.value.trim() || DEFAULT_OFFER_ID;
+                fetchOfferById(offerId);
+            });
+            
+            saveTokenButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                const token = apiTokenInput.value.trim();
+                if (token) {
+                    localStorage.setItem('42_api_token', token);
+                    logoutButton.style.display = 'block';
+                    authRequiredMessage.style.display = 'none';
+                    showNotification('API token saved successfully');
+                    
+                    // Load the default offer
+                    switchTab('direct');
+                    isSearchActive = false;
+                    fetchOfferById(DEFAULT_OFFER_ID);
+                } else {
+                    showError('Please enter a valid API token');
+                }
+            });
+            
+            logoutButton.addEventListener('click', () => {
+                localStorage.removeItem('42_api_token');
+                apiTokenInput.value = '';
+                logoutButton.style.display = 'none';
+                authRequiredMessage.style.display = 'block';
+                resultsContainer.innerHTML = '';
+                paginationContainer.innerHTML = '';
+                showNotification('API token cleared');
+            });
+            
+            // Load default offer if token exists
+            if (token) {
+                isSearchActive = false;
+                fetchOfferById(DEFAULT_OFFER_ID);
             }
         });
         
-        function setupLoginButton() {
-            loginButton.addEventListener('click', () => {
-                // Redirect to 42 OAuth login
-                const clientId = '42_client_id'; // Replace with your actual client ID
-                const redirectUri = encodeURIComponent(AUTH_REDIRECT_URI);
-                const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
-                window.location.href = authUrl;
+        // Tab Functions
+        function switchTab(tabId) {
+            tabButtons.forEach(button => {
+                if (button.getAttribute('data-tab') === tabId) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
+            tabContents.forEach(content => {
+                if (content.id === `${tabId}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
             });
         }
         
-        function handleAuthCallback() {
-            // Check if the URL contains an authorization code
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            
-            if (code) {
-                // Exchange code for token
-                showLoading(true);
-                exchangeCodeForToken(code)
-                    .then(token => {
-                        // Save token and fetch offers
-                        saveToken(token);
-                        authContainer.style.display = 'none';
-                        fetchOffers();
-                    })
-                    .catch(error => {
-                        showError('Authentication failed. Please try again.');
-                        console.error('Auth Error:', error);
-                        showLoading(false);
-                    });
-            }
-        }
-        
-        async function exchangeCodeForToken(code) {
-            // In a real app, you would call your backend to exchange the code for a token
-            // GitHub Pages doesn't support server-side code, so this would need to be handled by a separate backend service
-            
-            // Simulated token exchange - replace with actual implementation when you have a backend
-            return new Promise((resolve, reject) => {
-                // For demo purposes only - in production, use a real backend exchange
-                // This is just to show the flow - NOT for production use
-                resolve({
-                    access_token: 'simulated_token',
-                    expires_in: 7200
-                });
-            });
-        }
-        
-        function saveToken(token) {
-            localStorage.setItem('42_auth_token', token.access_token);
-            localStorage.setItem('42_token_expiry', Date.now() + (token.expires_in * 1000));
-        }
-        
+        // Token Functions
         function getToken() {
-            return localStorage.getItem('42_auth_token');
+            return localStorage.getItem('42_api_token');
         }
         
-        function isTokenExpired() {
-            const expiry = localStorage.getItem('42_token_expiry');
-            return !expiry || parseInt(expiry) < Date.now();
-        }
-        
-        function isAuthenticated() {
-            return getToken() && !isTokenExpired();
-        }
-        
-        function logout() {
-            localStorage.removeItem('42_auth_token');
-            localStorage.removeItem('42_token_expiry');
-            window.location.reload();
+        function showAuthRequired() {
+            showError('Please set your API token in the Settings tab');
+            switchTab('settings');
         }
         
         // API Functions
-        async function fetchOffers() {
+        async function searchOffers(params, page) {
             showLoading(true);
             clearError();
             
+            // Build the query string
+            const queryParams = new URLSearchParams();
+            if (params.query) queryParams.append('search', params.query);
+            if (params.location) queryParams.append('location', params.location);
+            if (params.duration) queryParams.append('duration', params.duration);
+            queryParams.append('page', page);
+            queryParams.append('sort', params.sort || 'newest');
+            
             try {
-                // Since the specific offer ID was provided (23430)
-                const offer = await fetchOfferById(23430);
-                displayOffer(offer);
+                const response = await fetch(`${API_BASE_URL}/offers?${queryParams.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    handleApiError(response);
+                    return;
+                }
+                
+                const data = await response.json();
+                currentPage = page;
+                totalPages = data.meta?.total_pages || 1;
+                
+                displayOffers(data.offers || data);
+                updatePagination();
             } catch (error) {
-                showError('Error fetching internship offers. Please try again later.');
-                console.error('API Error:', error);
+                showError(error.message || 'Error searching for offers');
+                console.error('Search Error:', error);
             } finally {
                 showLoading(false);
             }
         }
         
         async function fetchOfferById(id) {
-            // In a production app, this would make an actual API request
-            // Since we can't make direct API calls from GitHub Pages due to CORS restrictions,
-            // we'll simulate the API response structure based on the endpoint documentation
+            showLoading(true);
+            clearError();
             
-            // Simulated offer data structure based on API documentation
-            // In production, replace this with an actual fetch call to your backend proxy
-            return {
-                id: 23430,
-                title: "Software Engineering Internship",
-                description: "Join our engineering team and work on cutting-edge technology projects. This internship offers hands-on experience with our software development lifecycle and collaboration with senior engineers.",
-                company: {
-                    id: 42,
-                    name: "42 Technology Partners",
-                    country: "France",
-                    city: "Paris"
-                },
-                location: "Paris, France",
-                duration: "6 months",
-                compensation: "€1200/month",
-                requirements: "- Experience with C/C++\n- Knowledge of algorithms and data structures\n- Interest in system programming",
-                apply_url: "https://companies.intra.42.fr/offers/23430",
-                posted_date: "2025-03-15"
-            };
+            try {
+                const response = await fetch(`${API_BASE_URL}/offers/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    handleApiError(response);
+                    return;
+                }
+                
+                const offer = await response.json();
+                displaySingleOffer(offer);
+                paginationContainer.innerHTML = ''; // No pagination for single offer
+            } catch (error) {
+                showError(error.message || 'Error fetching the offer');
+                console.error('Fetch Error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function handleApiError(response) {
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('42_api_token');
+                logoutButton.style.display = 'none';
+                authRequiredMessage.style.display = 'block';
+                showError('Authentication failed. Please check your API token.');
+                switchTab('settings');
+            } else if (response.status === 404) {
+                showError('Offer not found. Please check the ID and try again.');
+            } else {
+                showError(`API error: ${response.status}`);
+            }
         }
         
         // UI Functions
-        function displayOffer(offer) {
-            let html = `
-                <div class="offer-card">
-                    <h3 class="offer-title">${offer.title}</h3>
-                    <p class="offer-company">${offer.company.name}</p>
-                    <p class="offer-location">${offer.location}</p>
-                    <div class="offer-description">${offer.description}</div>
-                    
-                    <h4>Requirements</h4>
-                    <div class="offer-description">${offer.requirements}</div>
-                    
-                    <div class="offer-details">
-                        <span class="offer-detail">Duration: ${offer.duration}</span>
-                        <span class="offer-detail">Posted: ${formatDate(offer.posted_date)}</span>
-                        <span class="offer-detail">Compensation: ${offer.compensation}</span>
-                    </div>
-                    
-                    <a href="${API_BASE_URL}/offers/${offer.id}" class="apply-btn" target="_blank">View Details & Apply</a>
+        function displayOffers(offers) {
+            if (!offers || offers.length === 0) {
+                resultsContainer.innerHTML = '<p class="status-message">No offers found matching your criteria</p>';
+                return;
+            }
+            
+            let html = '';
+            offers.forEach(offer => {
+                html += createOfferCard(offer);
+            });
+            
+            resultsContainer.innerHTML = html;
+        }
+        
+        function displaySingleOffer(offer) {
+            const offerCard = createOfferCard(offer);
+            
+            // Add raw data for debugging
+            const rawDataHtml = `
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <h4>Raw API Response:</h4>
+                    <pre style="background: #f5f5f5; padding: 15px; overflow: auto; max-height: 300px;">${JSON.stringify(offer, null, 2)}</pre>
                 </div>
             `;
             
-            resultsContainer.innerHTML = html;
-            paginationContainer.innerHTML = ''; // No pagination needed for single offer
+            resultsContainer.innerHTML = offerCard + rawDataHtml;
         }
         
+        function createOfferCard(offer) {
+            // Handle different possible API response structures
+            const offerId = offer.id || '';
+            const offerTitle = offer.title || offer.name || 'Internship Offer';
+            const companyName = offer.company?.name || offer.company_name || 'Company';
+            const location = offer.location || `${offer.city || ''}, ${offer.country || ''}`;
+            const description = offer.description || '';
+            const requirements = offer.requirements || offer.skills || '';
+            const duration = offer.duration || offer.internship_duration || 'Not specified';
+            const compensation = offer.compensation || offer.salary || 'Not specified';
+            const postedDate = offer.created_at || offer.posted_at || offer.posted_date || new Date().toISOString();
+            
+            return `
+                <div class="offer-card">
+                    <h3 class="offer-title">${offerTitle}</h3>
+                    <p class="offer-company">${companyName}</p>
+                    <p class="offer-location">${location}</p>
+                    
+                    <h4>Description</h4>
+                    <div class="offer-description">${description}</div>
+                    
+                    ${requirements ? `
+                    <h4>Requirements</h4>
+                    <div class="offer-description">${requirements}</div>
+                    ` : ''}
+                    
+                    <div class="offer-details">
+                        <span class="offer-detail">Duration: ${duration}</span>
+                        <span class="offer-detail">Posted: ${formatDate(postedDate)}</span>
+                        <span class="offer-detail">Compensation: ${compensation}</span>
+                    </div>
+                    
+                    <a href="${API_BASE_URL}/offers/${offerId}" class="apply-btn" target="_blank">View Details & Apply</a>
+                </div>
+            `;
+        }
+        
+        function updatePagination() {
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+            
+            let paginationHtml = '';
+            
+            // Previous button
+            paginationHtml += `
+                <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
+                    Previous
+                </button>
+            `;
+            
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `
+                    <button class="${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Next button
+            paginationHtml += `
+                <button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">
+                    Next
+                </button>
+            `;
+            
+            paginationContainer.innerHTML = paginationHtml;
+        }
+        
+        // Make changePage available globally for onclick handlers
+        window.changePage = function(page) {
+            if (isSearchActive && currentSearchParams) {
+                searchOffers(currentSearchParams, page);
+            }
+        };
+        
         function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString(undefined, options);
+            try {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString(undefined, options);
+            } catch (e) {
+                return dateString;
+            }
         }
         
         function showLoading(isLoading) {
@@ -370,6 +720,36 @@
         function showError(message) {
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = '#00babc';
+            notification.style.color = 'white';
+            notification.style.padding = '10px 20px';
+            notification.style.borderRadius = '4px';
+            notification.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            notification.style.zIndex = '1000';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
         }
         
         function clearError() {
